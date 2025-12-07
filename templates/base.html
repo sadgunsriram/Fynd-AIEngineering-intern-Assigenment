@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Feedback System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <span class="brand">Fynd AI Feedback</span>
+    </div>
+    <div class="nav-right">
+        <a href="{{ url_for('user_dashboard') }}">User</a>
+        <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+    </div>
+</nav>
+
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <p>AI-powered feedback system · Internship assignment</p>
+</footer>
+</body>
+</html>

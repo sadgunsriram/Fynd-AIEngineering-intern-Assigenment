@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}User Feedback{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h2>Share your experience</h2>
+    <form id="feedback-form" class="form">
+        <label for="rating">Rating</label>
+        <select id="rating" name="rating" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Very bad</option>
+            <option value="2">2 - Bad</option>
+            <option value="3">3 - Okay</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <label for="review">Review</label>
+        <textarea id="review" name="review" rows="4" placeholder="Tell us what happened..." required></textarea>
+
+        <button type="submit" class="btn-primary">Submit</button>
+    </form>
+
+    <div id="ai-response-card" class="ai-response hidden">
+        <h3>Our response</h3>
+        <p id="ai-response-text"></p>
+    </div>
+</section>
+
+<script>
+const form = document.getElementById("feedback-form");
+const aiCard = document.getElementById("ai-response-card");
+const aiText = document.getElementById("ai-response-text");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    aiCard.classList.add("hidden");
+    aiText.textContent = "";
+
+    const formData = new FormData(form);
+
+    const res = await fetch("{{ url_for('submit_feedback') }}", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+        aiText.textContent = data.ai_user_response;
+        aiCard.classList.remove("hidden");
+        form.reset();
+    } else {
+        aiText.textContent = data.error || "Something went wrong. Please try again.";
+        aiCard.classList.remove("hidden");
+    }
+});
+</script>
+{% endblock %}

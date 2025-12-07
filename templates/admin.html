@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h2>Overview</h2>
+    <div class="stats-grid">
+        <div class="stat">
+            <span class="stat-label">Total Reviews</span>
+            <span class="stat-value">{{ total }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Average Rating</span>
+            <span class="stat-value">{{ avg_rating }}</span>
+        </div>
+    </div>
+
+    <h3>Rating distribution</h3>
+    <div class="rating-bars">
+        {% for r in range(1, 6) %}
+            <div class="rating-row">
+                <span class="rating-label">{{ r }}★</span>
+                {% set count = rating_counts[r] %}
+                {% set percent = (count / total * 100) if total > 0 else 0 %}
+                <div class="rating-bar">
+                    <div class="rating-bar-fill" style="width: {{ percent }}%;"></div>
+                </div>
+                <span class="rating-count">{{ count }}</span>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="card">
+    <h2>Recent feedback</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Time</th>
+            <th>Rating</th>
+            <th>User Review</th>
+            <th>AI Summary</th>
+            <th>Recommended Action</th>
+            <th>AI User Response</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for fb in feedbacks %}
+            <tr>
+                <td>{{ fb.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td>⭐ {{ fb.rating }}</td>
+                <td>{{ fb.review_text }}</td>
+                <td>{{ fb.ai_admin_summary }}</td>
+                <td>{{ fb.ai_recommended_action }}</td>
+                <td>{{ fb.ai_user_response }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
