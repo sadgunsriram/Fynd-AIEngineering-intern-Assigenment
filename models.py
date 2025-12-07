@@ -5,8 +5,12 @@ db = SQLAlchemy()
 
 class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_message = db.Column(db.Text, nullable=False)
-    ai_response = db.Column(db.Text, nullable=False)
-    admin_summary = db.Column(db.Text)
-    admin_action = db.Column(db.Text)
+    rating = db.Column(db.Integer, nullable=False)
+    review_text = db.Column(db.Text, nullable=False)
+
+    ai_user_response = db.Column(db.Text, nullable=False)
+    ai_admin_summary = db.Column(db.Text)
+    ai_recommended_action = db.Column(db.Text)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
