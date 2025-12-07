@@ -1,17 +1,11 @@
 import os
-# from config import Config
-# from config import Config
 from task_2.config import Config
-
-
-
 from dotenv import load_dotenv
 load_dotenv()
-
-
+model_name="gemini-2.5-flash"
 import google.generativeai as genai
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
+print("DEBUG KEY:", os.getenv("GEMINI_API_KEY"))         
 
 USER_PROMPT_TEMPLATE = """
 You are a friendly customer support agent.
@@ -24,61 +18,47 @@ Tone:
 - Polite
 - Concise
 - Human-like
-- Match the sentiment (apologetic for low ratings, thankful for high ratings)
-
-Return only the response text, no explanations.
+- Match the sentiment
 """
 
 ADMIN_PROMPT_TEMPLATE = """
 You are an internal quality analyst for a retail platform.
 
-Given this rating and review:
-
-Rating: {rating} star(s)
+Rating: {rating}
 Review: "{review}"
 
-1. Summarize the core customer issue or compliment in ONE concise sentence.
-2. Suggest ONE concrete action item for the internal team (e.g., "Improve delivery speed", "Praise the support team", etc.).
+1. One-sentence summary.
+2. One recommended action.
 
-Return your answer in JSON:
+Return JSON:
 
-{{
-  "summary": "<one-sentence summary>",
-  "recommended_action": "<one-sentence action>"
-}}
+{
+ "summary": "",
+ "recommended_action": ""
+}
 """
 
-
-def _call_llm(prompt: str, json_mode: bool = False):
-    
-    model_name = "gemini-1.5-flash"
-    model = genai.GenerativeModel(model_name)
-    resp = model.generate_content(prompt)
-    return resp.text
+def _call_llm(prompt: str):
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = model.generate_content(prompt)
+    return response.text.strip()
 
 
-def generate_user_response(rating: int, review: str) -> str:
+def generate_user_response(rating, review):
     prompt = USER_PROMPT_TEMPLATE.format(rating=rating, review=review)
-    return _call_llm(prompt, json_mode=False).strip()
+    return _call_llm(prompt)
 
-
-def generate_admin_summary_and_action(rating: int, review: str):
+def generate_admin_summary_and_action(rating, review):
     import json, re
 
-    prompt = ADMIN_PROMPT_TEMPLATE.format(rating=rating, review=review)
-    raw = _call_llm(prompt, json_mode=False)
-
-    # Attempt JSON extraction
+    raw = _call_llm(ADMIN_PROMPT_TEMPLATE.format(rating=rating, review=review))
     try:
-        obj = json.loads(raw)
-        return obj.get("summary", "").strip(), obj.get("recommended_action", "").strip()
-    except Exception:
-        # Fallback: try to loosely parse {...}
-        try:
-            match = re.search(r"\{.*\}", raw, re.DOTALL)
-            if match:
-                obj = json.loads(match.group(0))
-                return obj.get("summary", "").strip(), obj.get("recommended_action", "").strip()
-        except Exception:
-            pass
+        return json.loads(raw)["summary"], json.loads(raw)["recommended_action"]
+    except:
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if match:
+            obj = json.loads(match.group(0))
+            return obj.get("summary", ""), obj.get("recommended_action", "")
     return "", ""
+
+
